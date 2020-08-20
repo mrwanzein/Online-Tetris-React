@@ -41,6 +41,7 @@ footer, header, hgroup, menu, nav, section {
 body {
 	line-height: 1;
 	font-family: Tahoma, Geneva, sans-serif;
+	height: 100vh;
 }
 ol, ul {
 	list-style: none;

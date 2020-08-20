@@ -35,6 +35,7 @@ const cycleTetrisColors = keyframes`
 
     62.5% {
         color: red;
+        text-shadow: 4px 4px 0px white;
     }
 
     75% {
@@ -54,7 +55,7 @@ const Wrapper = styled.div`
     background-color: lightcoral;
 
     .active {
-        border-bottom: 2px solid white;
+        border-left: 2px solid white;
     }
 
 `;
@@ -64,6 +65,7 @@ const NavATags = styled(NavLink)`
     margin: 0 20px;
     padding: 10px 20px;
     color: white;
+    border-radius: 5px;
 
     &:hover {
         background-color: rgb(219, 117, 110);

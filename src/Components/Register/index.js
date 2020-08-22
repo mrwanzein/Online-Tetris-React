@@ -1,4 +1,5 @@
 import React from 'react';
+import { useHistory } from "react-router-dom";
 import styled from 'styled-components';
 
 
@@ -7,10 +8,41 @@ const Register = () => {
         username: "",
         password: ""
     });
+    const [warningMsg, setWarningMsg] = React.useState("");
+    const [loadingIcon, setLoadingIcon] = React.useState(false);
+
+    let history = useHistory();
     
-    const submitHandler = (ev, payload) => {
+    const submitHandler = async (ev, payload) => {
         ev.preventDefault();
-        console.log(payload);
+        try {
+            setLoadingIcon(true);
+            const res = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            
+            const data = await res.json();
+            console.log(data);
+
+            if(data.created) {
+                history.push('/login');
+            } else {
+                setLoadingIcon(false);
+                setWarningMsg(data.message);
+                setFormVals({
+                    username: "",
+                    password: ""
+                });
+            }
+
+
+        } catch(err) {
+            console.log(err);
+        }
     }
     
     const getInputValues = (ev) => {
@@ -27,23 +59,29 @@ const Register = () => {
             <CustomForm onSubmit={(ev) => { submitHandler(ev, formVals) }} autoComplete="off">
                 <FormHeader>Please provide a username and a password</FormHeader>
                 <InsideForm>
-                    <FormLabels htmlFor="username" style={{marginRight: "auto"}}>Username</FormLabels>
+                    <FormLabels htmlFor="username" style={{marginRight: "auto"}}>Username(case sensitive)</FormLabels>
                     <CustomInput 
                         type="text"
                         name="username"
                         value={formVals.username}
                         onChange={getInputValues}
                     />
+                    <CharLimitWarning>
+                        {formVals.username.length > 16 ? `* ${(formVals.username.length - 16)} characters over the limit` : ""}
+                    </CharLimitWarning>
                     <FormLabels htmlFor="password" style={{marginRight: "auto"}}>Password</FormLabels>
                     <CustomInput 
-                        type="text"
+                        type="password"
                         name="password"
                         value={formVals.password}
                         onChange={getInputValues}
                     />
-                    <CustomInputSubmit 
-                        type="submit"
-                    />
+                    <WarningMessage>{warningMsg}</WarningMessage>
+                    {
+                        formVals.username.length <= 16 && formVals.password.length ?
+                        <CustomInputSubmit type="submit">{loadingIcon ? <i className="fa fa-spinner fa-spin"></i> : "Register"}</CustomInputSubmit> :
+                        <CustomInputSubmit style={{cursor: "not-allowed"}} disabled>Register</CustomInputSubmit>
+                    }
                 </InsideForm>
             </CustomForm>
         </Wrapper>
@@ -102,7 +140,7 @@ const FormHeader = styled.span`
     border-bottom: 2px solid lightgrey;
 `;
 
-const CustomInputSubmit = styled.input`
+const CustomInputSubmit = styled.button`
     width: 200px;
     margin: 50px 0 0 auto;
     padding: 10px 15px;
@@ -113,6 +151,19 @@ const CustomInputSubmit = styled.input`
     &:active {
         box-shadow: inset 0px 0px 7px -1px rgba(0,0,0,0.75);
     }
+`;
+
+const WarningMessage = styled.span`
+    font-size: 1.5em;
+    color: black;
+    font-style: italic;
+`;
+
+const CharLimitWarning = styled.span`
+    margin-right: auto;
+    font-size: 1.1em;
+    font-style: italic;
+    margin-bottom: 20px;
 `;
 
 export default Register;

@@ -148,12 +148,14 @@ const CustomInputSubmit = styled.button`
     margin-top: 35px;
     width: 200px;
     padding: 10px 15px;
-    box-shadow: 0px 0px 5px -1px rgba(0,0,0,0.75);
+    box-shadow: 0px 0px 12px -1px rgba(0,0,0,0.75);
     border-radius: 5px;
+    transition: all 0.1s;
     cursor: pointer;
 
     &:active {
         box-shadow: inset 0px 0px 7px -1px rgba(0,0,0,0.75);
+        transform: translate(0px,2px);
     }
 `;
 

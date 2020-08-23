@@ -1,4 +1,5 @@
 import React from 'react';
+import styled from 'styled-components';
 
 import Stage from './Stage';
 import Display from './Display';
@@ -8,7 +9,7 @@ import { createStage } from './gameHelpers';
 
 const Tetris = ({ callback }) => {
     return(
-        <div>
+        <TetrisStage>
             <Stage stage={createStage()} />
             <aside>
                 <div>
@@ -18,8 +19,16 @@ const Tetris = ({ callback }) => {
                 </div>
                 <StartButton />
             </aside>
-        </div>
+        </TetrisStage>
     )
 }
+
+const TetrisStage = styled.div`
+    display: flex;
+    
+    aside {
+        margin-left: 20px;
+    }
+`;
 
 export default Tetris;

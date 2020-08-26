@@ -16,6 +16,8 @@ const StyledStartButton = styled.button`
     background-color: #3498DB;
 	border-bottom: 5px solid #2980B9;
 	text-shadow: 0px -2px #2980B9;
+    position: absolute;
+    align-self: flex-end;
     cursor: pointer;
 
     &:active {

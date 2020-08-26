@@ -5,7 +5,7 @@ import Stage from './Stage';
 import Display from './Display';
 import StartButton from './StartButton'
 
-import { createStage } from './gameHelpers';
+import { createStage, checkCollision } from './gameHelpers';
 import { usePlayer} from './hooks/usePlayer';
 import { useStage } from './hooks/useStage';
 
@@ -19,17 +19,30 @@ const Tetris = () => {
     console.log("re-render")
     
     const movePlayer = (direction) => {
-        updatePlayerPos({ x: direction, y: 0 });
+        if(!checkCollision(player, stage, {x: direction, y: 0})) {
+            updatePlayerPos({ x: direction, y: 0 });
+        }
     }
 
     const startGame = () => {
         // Resets everything
         setStage(createStage());
         resetPlayer();
+        setGameOver(false);
     }
 
     const drop = () => {
-        updatePlayerPos({ x: 0, y: 1, collided: false });
+        if(!checkCollision(player, stage, {x: 0, y: 1})) {
+            updatePlayerPos({ x: 0, y: 1, collided: false });
+        } else {
+            // Checking if a tetromino is overflowing the top of the stage
+            if(player.pos.y < 1) {
+                console.log("GAME OVER!!");
+                setGameOver(true);
+                setDropTime(null);
+            }
+            updatePlayerPos({ x: 0, y: 0, collided: true });
+        }
     }
 
     const dropPlayer = () => {
@@ -53,14 +66,20 @@ const Tetris = () => {
             <TetrisStage>
                 <Stage stage={stage} />
                 <aside>
-                    {
-                        gameOver ? <span>Game Over!</span> : 
-                        <div>
-                            <Display text="Score" />
-                            <Display text="Rows" />
-                            <Display text="Level" />
-                        </div>
-                    }
+                    <div>
+                        {
+                            gameOver ? 
+                                <>
+                                <GameOver>Game Over!</GameOver>
+                                </>
+                                :
+                                <>
+                                <Display text="Score" />
+                                <Display text="Rows" />
+                                <Display text="Level" />
+                                </>
+                        }
+                    </div>
                     <StartButton callback={startGame}/>
                 </aside>
             </TetrisStage>
@@ -73,6 +92,7 @@ const TetrisStage = styled.div`
     
     aside {
         margin-left: 20px;
+        display: flex;
     }
 `;
 
@@ -85,6 +105,13 @@ const InputWrapper = styled.div`
     &:focus {
         outline: none;
     }
+`;
+
+const GameOver = styled.span`
+    display: block;
+    margin-bottom: 100px;
+    font-size: 3em;
+    color: red;
 `;
 
 export default Tetris;

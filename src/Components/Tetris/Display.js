@@ -1,11 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const Display = ({ gameOver, text }) => (
+const Display = ({ text }) => (
     <StyledDisplay>{text}</StyledDisplay>
 )
 
-    //color: linear-gradient(0deg, rgba(52,75,110,0.5970763305322129) 0%, rgba(178,190,236,0.5326505602240896) 50%, rgba(10,129,238,1) 100%);
 const StyledDisplay = styled.div`
     width: 250px;
     margin: 20px 25px;

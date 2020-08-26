@@ -8,6 +8,7 @@ import StartButton from './StartButton'
 import { createStage, checkCollision } from './gameHelpers';
 import { usePlayer} from './hooks/usePlayer';
 import { useStage } from './hooks/useStage';
+import { useInterval } from './hooks/useInterval';
 
 const Tetris = () => {
     const [dropTime, setDropTime] = useState(null);
@@ -27,6 +28,7 @@ const Tetris = () => {
     const startGame = () => {
         // Resets everything
         setStage(createStage());
+        setDropTime(1000);
         resetPlayer();
         setGameOver(false);
     }
@@ -45,7 +47,16 @@ const Tetris = () => {
         }
     }
 
+    const keyUp = ({ keyCode }) => {
+        if(!gameOver && keyCode === 40) {
+            // Re-activates useInterval when user finished active tetromino dropping
+            setDropTime(1000);
+        }
+    }
+
     const dropPlayer = () => {
+        // Stop useInterval to avoid interference with active tetromino dropping
+        setDropTime(null);
         drop();
     }
 
@@ -65,8 +76,12 @@ const Tetris = () => {
         }
     }
 
+    useInterval(() => {
+        drop();
+    }, dropTime);
+
     return(
-        <InputWrapper role="button" tabIndex="0" onKeyDown={e => move(e)}>
+        <InputWrapper role="button" tabIndex="0" onKeyDown={e => move(e)} onKeyUp={e => keyUp(e)}>
             <TetrisStage>
                 <Stage stage={stage} />
                 <aside>

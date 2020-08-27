@@ -35,15 +35,15 @@ const Tetris = () => {
         setLevel(1);
     }
 
-    const drop = () => {
+    const drop = (fullDrop = 1, fromFullDrop = false) => {
         // Increase level when player has cleared 10 rows
         if(rows > (level * 10)) {
             setLevel(prev => prev + 1);
             setDropTime(1000 - (level > 1 ? 50 * level : 0));
         }
-
+        
         if(!checkCollision(player, stage, {x: 0, y: 1})) {
-            updatePlayerPos({ x: 0, y: 1, collided: false });
+            updatePlayerPos({ x: 0, y: fullDrop, collided: false, fromFullDrop });
         } else {
             // Checking if a tetromino is overflowing the top of the stage
             if(player.pos.y < 1) {
@@ -68,6 +68,47 @@ const Tetris = () => {
         drop();
     }
 
+    const checkIfOneOfPlayerSquaresIsAlignedOverMergedCell = (cellXPos, player) => {
+        // Check if a player tetromino and it' s aligned over a merged tetromino
+        for(let i=0; i<player.tetromino.length; i++) {
+            for(let j=0; j<player.tetromino.length; j++) {
+                if(cellXPos === player.pos.x + i && stage[player.pos.y + j][player.pos.x + i][0] !== 0) return true;
+            }
+        }
+    }
+
+    const getRotatedLengthOfTetromino = () => {
+        let flag = player.tetromino.map(row => {
+            return row.every(cell => cell === 0);
+        });
+        // if -1 it means not rotated
+        return flag.indexOf(true) === -1 ? true : false;
+    }
+
+    const fullDrop = () => {
+        let heightOfNextMerged = 0;
+
+        for(let i=0; i<stage.length; i++){
+            let flag = false;
+            
+            for(let j=0; j<stage[i].length; j++){
+                if(stage[i][j][1] === 'merged' && checkIfOneOfPlayerSquaresIsAlignedOverMergedCell(j, player)){
+                    heightOfNextMerged = i - (getRotatedLengthOfTetromino() ? player.tetromino.length : player.tetromino.length - 1);
+                    flag = true;
+                    break;
+                } else {
+                    heightOfNextMerged = 20 - player.tetromino.length;
+                }
+            }
+            if(flag) break;
+        }
+        
+
+        setDropTime(null);
+        drop(heightOfNextMerged, true);
+        setDropTime(1000 - (level > 1 ? 50 * level : 0));
+    }
+
     const move = ({ keyCode }) => {
         if(!gameOver) {
             if(keyCode === 37) {
@@ -80,6 +121,8 @@ const Tetris = () => {
                 playerRotate(stage, -1);
             } else if(keyCode === 70) {
                 playerRotate(stage, 1);
+            } else if(keyCode === 32) {
+                fullDrop();
             }
         }
     }
@@ -89,7 +132,7 @@ const Tetris = () => {
     }, dropTime);
 
     return(
-        <InputWrapper role="button" tabIndex="0" onKeyDown={e => move(e)} onKeyUp={e => keyUp(e)}>
+        <InputWrapper id="controller" role="button" tabIndex="0" onKeyDown={e => move(e)} onKeyUp={e => keyUp(e)}>
             <TetrisStage>
                 <Stage stage={stage} />
                 <aside>

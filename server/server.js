@@ -1,5 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
+const http = require('http');
+const socketIo = require('socket.io');
 
 const app = express();
 
@@ -7,6 +9,23 @@ const { insertOneUser, getUser } = require('./Utils/mongoDBMethods');
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+const server = http.createServer(app);
+const io = socketIo(server);
+
+
+io.on('connection', (socket) => {
+    console.log('user connected');
+    
+    socket.on('chatMsg', (msg) => {
+        console.log(`message: ${msg}`);
+    })
+
+    // socket.on('disconnect', () => {
+    //     console.log('user disconnected');
+    // });
+});
+
 
 app.get('/', (req, res) => {
     res.send('Hearing you clearly sir');
@@ -53,6 +72,6 @@ app.post('/login', async(req, res) => {
     }
 })
 
-app.listen(8000, () => {
+server.listen(8000, () => {
     console.log("Listening on port 8000");
 })

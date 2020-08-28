@@ -6,16 +6,17 @@ const Display = ({ text }) => (
 )
 
 const StyledDisplay = styled.div`
-    width: 250px;
+    width: 200px;
     margin: 20px 25px;
     padding: 10px;
-    font-size: 35px;
+    font-size: 20px;
     background: -webkit-linear-gradient(#a5b5f2, #91a6f6, #a6d4ff);
     background-clip: inherit;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     box-shadow: inset 0px 0px 16px -9px rgba(0,0,0,0.75);
     border-radius: 5px;
+    font-family: 'Press Start 2P', cursive;
 `;
 
 export default Display;

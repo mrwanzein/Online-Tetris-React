@@ -3,17 +3,29 @@ import styled from 'styled-components';
 
 import Stage from './Stage';
 import Display from './Display';
-import StartButton from './StartButton'
+import StartButton from './StartButton';
 
 import { createStage, checkCollision } from './gameHelpers';
+import { tetrominoArr } from './gameHelpers/tetrominos';
 import { usePlayer} from './hooks/usePlayer';
 import { useStage } from './hooks/useStage';
 import { useInterval } from './hooks/useInterval';
 import { useGameStatus } from './hooks/useGameStatus';
 
+import O from '../../assets/O.png';
+import I from '../../assets/I.png';
+import J from '../../assets/J.png';
+import L from '../../assets/L.png';
+import S from '../../assets/S.png';
+import T from '../../assets/T.png';
+import Z from '../../assets/Z.png';
+
+let tetrominoImages = {O, I, J, L, S, T, Z};
+
 const Tetris = () => {
     const [dropTime, setDropTime] = useState(null);
     const [gameOver, setGameOver] = useState(false);
+    const [gameStarted, setGameStarted] = useState(false);
 
     const [player, updatePlayerPos, resetPlayer, playerRotate] = usePlayer();
     const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
@@ -47,8 +59,8 @@ const Tetris = () => {
         } else {
             // Checking if a tetromino is overflowing the top of the stage
             if(player.pos.y < 1) {
-                console.log("GAME OVER!!");
                 setGameOver(true);
+                setGameStarted(false);
                 setDropTime(null);
             }
             updatePlayerPos({ x: 0, y: 0, collided: true });
@@ -140,17 +152,25 @@ const Tetris = () => {
                         {
                             gameOver ? 
                                 <>
-                                <GameOver>Game Over!</GameOver>
+                                    <GameOver>Game Over!</GameOver>
                                 </>
                                 :
                                 <>
-                                <Display text={`Score: ${score}`} />
-                                <Display text={`Rows: ${rows}`} />
-                                <Display text={`Level: ${level}`} />
+                                    <Display text={`Score: ${score}`} />
+                                    <Display text={`Rows: ${rows}`} />
+                                    <Display text={`Level: ${level}`} />
+                                    { 
+                                        gameStarted ? 
+                                        <NextDisplay>
+                                            <NextHeader>Next</NextHeader>
+                                            <img style={{display: "block", margin: "0 auto"}} src={tetrominoImages[tetrominoArr[1][1]]} alt={`${tetrominoArr[0][1]} tetromino`}/>
+                                        </NextDisplay> : 
+                                        ""
+                                    }
                                 </>
                         }
                     </div>
-                    <StartButton callback={startGame}/>
+                    <StartButton setGameStarted={setGameStarted} callback={startGame}/>
                 </aside>
             </TetrisStage>
         </InputWrapper>
@@ -182,6 +202,18 @@ const GameOver = styled.span`
     margin-bottom: 100px;
     font-size: 3em;
     color: red;
+`;
+
+const NextDisplay = styled.div`
+    border: 2px solid black;
+`;
+
+const NextHeader = styled.div`
+    font-family: 'Press Start 2P', cursive;
+    background-color: rgb(248, 248, 248);
+    text-align: center;
+    font-size: 1.1em;
+    padding: 5px 0;
 `;
 
 export default Tetris;

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-import { TETROMINOS, randomTetromino } from '../gameHelpers/tetrominos';
+import { TETROMINOS, randomTetromino, tetrominoArr } from '../gameHelpers/tetrominos';
 import { STAGE_WIDTH, checkCollision } from '../gameHelpers';
 
 export const usePlayer = () => {
@@ -75,9 +75,13 @@ export const usePlayer = () => {
     }
 
     const resetPlayer = useCallback(() => {
+        // Cycle the tetrominoArr with a new random tetromino
+        tetrominoArr.shift()
+        tetrominoArr.push(randomTetromino());
+        
         setPlayer({
             pos: { x: (STAGE_WIDTH / 2) - 2, y: 0 },
-            tetromino: randomTetromino().shape,
+            tetromino: tetrominoArr[0][0].shape,
             collided: false
         });
     }, [])

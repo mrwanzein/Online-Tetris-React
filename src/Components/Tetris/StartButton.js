@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const StartButton = ({ callback }) => (
-    <StyledStartButton onClick={(e) => {document.getElementById('controller').focus(); callback()}}>Start Game</StyledStartButton>
+const StartButton = ({ callback, setGameStarted }) => (
+    <StyledStartButton onClick={(e) => {document.getElementById('controller').focus(); setGameStarted(true); callback()}}>Start Game</StyledStartButton>
 )
 
 const StyledStartButton = styled.button`
@@ -10,6 +10,7 @@ const StyledStartButton = styled.button`
     margin: 0px 10px 10px 0px;
 	border-radius: 10px;
 	font-size: 20px;
+    font-family: 'Press Start 2P', cursive;
 	color: #FFF;
 	text-decoration: none;
     transition: all 0.1s;

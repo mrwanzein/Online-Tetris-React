@@ -2,11 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 
-import { SocketProvider } from './Components/SocketContext';
+import { GameProvider } from './Components/GameContext';
 
 ReactDOM.render(
-    <SocketProvider>
+    <GameProvider>
       <App />
-    </SocketProvider>,
+    </GameProvider>,
   document.getElementById('root')
 );

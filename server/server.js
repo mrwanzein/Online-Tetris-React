@@ -13,17 +13,24 @@ app.use(express.json());
 const server = http.createServer(app);
 const io = socketIo(server);
 
-
+let onlineUsers = [];
 io.on('connection', (socket) => {
     console.log('user connected');
     
-    socket.on('chatMsg', (msg) => {
-        console.log(`message: ${msg}`);
-    })
+    socket.on('getLoggedInUsers', () => {
+        io.emit('getLoggedInUsers', onlineUsers);
+    });
+    
+    socket.on('newUserLoggedIn', (user) => {
+        onlineUsers.push(user)
+        socket.username = user;
+        io.emit('getNewLoggedInUsers', onlineUsers);
+    });
 
-    // socket.on('disconnect', () => {
-    //     console.log('user disconnected');
-    // });
+    socket.on('disconnect', () => {
+        onlineUsers.splice(onlineUsers.indexOf(socket.username), 1);
+        console.log(`${socket.username} disconnected`);
+    });
 });
 
 
@@ -58,7 +65,7 @@ app.post('/login', async(req, res) => {
         
         if(user) {
             if(await bcrypt.compare(password, user.password)){
-                res.status(200).json({ status: 200, status: "success" });
+                res.status(200).json({ status: 200, status: "success", username: user.username });
             } else {
                 res.status(200).json({ status: 200, status: "incorrect password" });
             }

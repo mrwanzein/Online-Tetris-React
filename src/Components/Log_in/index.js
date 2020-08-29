@@ -2,11 +2,15 @@ import React from 'react';
 import { useHistory } from "react-router-dom";
 import styled from 'styled-components';
 
+import { GameContext } from '../GameContext';
+
 const Log_in = () => {
     const [formVals, setFormVals] = React.useState({
         username: "",
         password: ""
     });
+
+    const { socket } = React.useContext(GameContext);
 
     const [warningMsg, setWarningMsg] = React.useState("");
     const [loadingIcon, setLoadingIcon] = React.useState(false);
@@ -29,6 +33,7 @@ const Log_in = () => {
             console.log(data);
 
             if(data.status === "success") {
+                socket.emit("newUserLoggedIn", data.username);
                 history.push('/');
             } else if(data.status === "incorrect password") {
                 setLoadingIcon(false);

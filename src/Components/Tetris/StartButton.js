@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 const StartButton = ({ callback, setGameStarted }) => (
-    <StyledStartButton onClick={(e) => {document.getElementById('controller').focus(); setGameStarted(true); callback()}}>Start Game</StyledStartButton>
+    <StyledStartButton onClick={(e) => {document.getElementById('controller').focus(); setGameStarted(true); callback()}}>Practice</StyledStartButton>
 )
 
 const StyledStartButton = styled.button`

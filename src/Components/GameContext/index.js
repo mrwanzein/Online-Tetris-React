@@ -8,7 +8,7 @@ export const GameProvider = ({ children }) => {
     const socket = socketIo("http://localhost:8000");
     
     return <GameContext.Provider value={{
-        socket
+        socket,
     }}>{children}
     </GameContext.Provider>;
 }

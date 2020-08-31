@@ -22,7 +22,7 @@ import Z from '../../assets/Z.png';
 
 let tetrominoImages = {O, I, J, L, S, T, Z};
 
-const Tetris = () => {
+const Tetris = ({ inBattle }) => {
     const [dropTime, setDropTime] = useState(null);
     const [gameOver, setGameOver] = useState(false);
     const [gameStarted, setGameStarted] = useState(false);
@@ -170,7 +170,7 @@ const Tetris = () => {
                                 </>
                         }
                     </div>
-                    <StartButton setGameStarted={setGameStarted} callback={startGame}/>
+                    <StartButton setGameStarted={setGameStarted} callback={startGame} inBattle={inBattle}/>
                 </aside>
             </TetrisStage>
         </InputWrapper>
@@ -191,6 +191,7 @@ const InputWrapper = styled.div`
     justify-content: center;
     align-items: center;
     height: calc(100vh - 80px);
+    background-color: #dfeffd;
     
     &:focus {
         outline: none;
@@ -206,6 +207,7 @@ const GameOver = styled.span`
 
 const NextDisplay = styled.div`
     border: 2px solid black;
+    background-color: white;
 `;
 
 const NextHeader = styled.div`

@@ -4,17 +4,21 @@ import Tetris from '../Tetris';
 import OnlineUsers from '../OnlineUsers';
 import { GameContext } from '../GameContext';
 
+import { useInterval } from '../Tetris/hooks/useInterval';
+
 const Homepage = () => {
-    const {socket} = React.useContext(GameContext);
     const [onlineUsers, setOnlineUsers] = React.useState(null);
+    const {socket} = React.useContext(GameContext);
+    
     
     React.useEffect(() => {
+        
         socket.emit('getLoggedInUsers');
         
         socket.on("getLoggedInUsers", (users) => {
             setOnlineUsers(users);
         });
-
+        
         socket.on("getNewLoggedInUsers", (users) => {
             setOnlineUsers(users);
         });
@@ -23,11 +27,20 @@ const Homepage = () => {
             socket.off("getLoggedInUsers");
             socket.off("getNewLoggedInUsers");
         }
-    }, [socket]);
-
+        
+    }, [socket, setOnlineUsers]);
+    
+    useInterval(() => {
+        socket.emit('getLoggedInUsers');
+            
+        socket.on("getLoggedInUsers", (users) => {
+            setOnlineUsers(users);
+        });
+    }, 3000);
+    
     return(
         <>
-            <OnlineUsers usersOnline={onlineUsers} />
+            <OnlineUsers usersOnline={onlineUsers}/>
             <Tetris />
         </>
     )

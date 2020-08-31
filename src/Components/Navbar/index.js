@@ -2,12 +2,16 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 
+import { GameContextWithoutSocketTrigger } from '../GameContextWithoutSocketTriggerProvider';
+
 const Navbar = () => {
+    const { localUser } = React.useContext(GameContextWithoutSocketTrigger);
+    
     return(
         <Wrapper>
             <NavTitle exact to="/" activeClassName="title">Ultimate Tetris Mania</NavTitle>
-            <NavATags exact to="/register">Register</NavATags>
-            <NavATags exact to="/login">Log in</NavATags>
+            { localUser ? null :  <NavATags exact to="/register">Register</NavATags> }
+            { localUser ? <LogOut onClick={() => window.location.reload()}>Log out</LogOut> : <NavATags exact to="/login">Log in</NavATags> }
         </Wrapper>
     )
 }
@@ -61,6 +65,18 @@ const Wrapper = styled.div`
 `;
 
 const NavATags = styled(NavLink)`
+    background-color: rgb(219, 92, 83);
+    margin: 0 20px;
+    padding: 10px 20px;
+    color: white;
+    border-radius: 5px;
+
+    &:hover {
+        background-color: rgb(219, 117, 110);
+    }
+`;
+
+const LogOut = styled.button`
     background-color: rgb(219, 92, 83);
     margin: 0 20px;
     padding: 10px 20px;

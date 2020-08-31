@@ -3,6 +3,7 @@ import { useHistory } from "react-router-dom";
 import styled from 'styled-components';
 
 import { GameContext } from '../GameContext';
+import { GameContextWithoutSocketTrigger } from '../GameContextWithoutSocketTriggerProvider';
 
 const Log_in = () => {
     const [formVals, setFormVals] = React.useState({
@@ -11,6 +12,7 @@ const Log_in = () => {
     });
 
     const { socket } = React.useContext(GameContext);
+    const { setLocalUser } = React.useContext(GameContextWithoutSocketTrigger);
 
     const [warningMsg, setWarningMsg] = React.useState("");
     const [loadingIcon, setLoadingIcon] = React.useState(false);
@@ -30,10 +32,10 @@ const Log_in = () => {
             });
             
             const data = await res.json();
-            console.log(data);
 
             if(data.status === "success") {
                 socket.emit("newUserLoggedIn", data.username);
+                setLocalUser(data.username);
                 history.push('/');
             } else if(data.status === "incorrect password") {
                 setLoadingIcon(false);
@@ -42,6 +44,9 @@ const Log_in = () => {
                     ...formVals,
                     password: ""
                 });
+            } else if(data.status === "Already logged") {
+                setLoadingIcon(false);
+                setWarningMsg(data.status);
             } else {
                 setLoadingIcon(false);
                 setWarningMsg(data.message);

@@ -18,17 +18,42 @@ io.on('connection', (socket) => {
     console.log('user connected');
     
     socket.on('getLoggedInUsers', () => {
+        console.log(onlineUsers)
         io.emit('getLoggedInUsers', onlineUsers);
     });
     
     socket.on('newUserLoggedIn', (user) => {
-        onlineUsers.push(user)
+        onlineUsers.push([user, socket.id])
         socket.username = user;
         io.emit('getNewLoggedInUsers', onlineUsers);
     });
 
+    socket.on('challengeOpponent', (opponent) => {
+        io.to(onlineUsers.find(user => user[0] === opponent)[1]).emit('whoChallengeMe', `${socket.username}`);
+    });
+
+    socket.on('challengeRefused', (challenger) => {
+        io.to(onlineUsers.find(user => user[0] === challenger)[1]).emit('challengeRefused', false);
+    });
+
+    socket.on('joinBattleRoom', (duelUsers) => {
+        socket.join(`${duelUsers[0]}VS${duelUsers[1]}`);
+        io.to(onlineUsers.find(user => user[0] === duelUsers[1])[1]).emit('getInRoom', `${duelUsers[0]}VS${duelUsers[1]}`);
+    });
+
+    socket.on('challengerTurnToJoinRoom', (roomToJoin) => {
+        socket.join(roomToJoin);
+        io.in(roomToJoin).emit('readyUp', true);
+    });
+
     socket.on('disconnect', () => {
-        onlineUsers.splice(onlineUsers.indexOf(socket.username), 1);
+        let indexOfUser;
+        onlineUsers.forEach((user, index) => {
+            if(user.indexOf(socket.username) !== -1){
+              indexOfUser = index;
+            }
+          })
+        onlineUsers.splice(indexOfUser, 1);
         console.log(`${socket.username} disconnected`);
     });
 });
@@ -64,7 +89,10 @@ app.post('/login', async(req, res) => {
         const user = await getUser(username);
         
         if(user) {
-            if(await bcrypt.compare(password, user.password)){
+            if(onlineUsers.includes(username)) {
+                res.status(200).json({ status: 200, status: "Already Logged"});
+            }
+            else if(await bcrypt.compare(password, user.password)){
                 res.status(200).json({ status: 200, status: "success", username: user.username });
             } else {
                 res.status(200).json({ status: 200, status: "incorrect password" });

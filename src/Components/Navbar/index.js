@@ -82,6 +82,7 @@ const LogOut = styled.button`
     padding: 10px 20px;
     color: white;
     border-radius: 5px;
+    cursor: pointer;
 
     &:hover {
         background-color: rgb(219, 117, 110);

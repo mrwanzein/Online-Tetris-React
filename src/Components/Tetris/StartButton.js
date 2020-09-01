@@ -1,17 +1,26 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const StartButton = ({ callback, setGameStarted, inBattle }) => (
-    <StyledStartButton onClick={(e) => {document.getElementById('controller').focus(); setGameStarted(true); callback()}}>
-        {inBattle ? "Ready" : "Practice"}
-    </StyledStartButton>
+const StartButton = ({ callback, inBattle, waitingForChallenger }) => (
+    <>
+        {
+            waitingForChallenger ? 
+            <StyledStartButton disabled>
+                Waiting challenger...
+            </StyledStartButton>
+            :
+            <StyledStartButton onClick={(e) => {document.getElementById('controller').focus(); callback()}}>
+                {inBattle ? "Ready" : "Practice"}
+            </StyledStartButton>
+        }
+    </>
 )
 
 const StyledStartButton = styled.button`
 	padding: 10px 40px;
     margin: 0px 10px 10px 0px;
 	border-radius: 10px;
-	font-size: 20px;
+	font-size: 15px;
     font-family: 'Press Start 2P', cursive;
 	color: #FFF;
 	text-decoration: none;

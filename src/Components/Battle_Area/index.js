@@ -8,23 +8,24 @@ import Tetris from '../Tetris';
 const Battle_Area = () => {
     const { socket } = React.useContext(GameContext);
     const [getReady, setGetReady] = React.useState(false);
+    const [waitingForChallenger, setWaitingForChallenger] = React.useState(true);
 
     React.useEffect(() => {
         socket.on('readyUp', (res) => {
-            setGetReady(true);
+            setGetReady(res);
         });
 
         return () => {
             socket.off('readyUp');
         }
-    }, [socket])
+    }, [socket, setGetReady]);
     
     return(
         <>
             {getReady ? <ReadyMsg>Please get ready!</ReadyMsg> : ""}
             <Wrapper>
-                <Tetris inBattle={true}/>
-                <Tetris inBattle={true}/>
+                <Tetris inBattle={true} setGetReady={setGetReady} opponent={false}/>
+                <Tetris waitingForChallenger={waitingForChallenger} setWaitingForChallenger={setWaitingForChallenger} opponent={true}/>
             </Wrapper>
         </>
     )

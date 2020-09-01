@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
+import { GameContext } from '../GameContext';
+import { GameContextWithoutSocketTrigger } from '../GameContextWithoutSocketTriggerProvider';
+
 import Stage from './Stage';
 import Display from './Display';
 import StartButton from './StartButton';
@@ -22,7 +25,7 @@ import Z from '../../assets/Z.png';
 
 let tetrominoImages = {O, I, J, L, S, T, Z};
 
-const Tetris = ({ inBattle }) => {
+const Tetris = ({ inBattle, waitingForChallenger, setWaitingForChallenger, opponent, setGetReady }) => {
     const [dropTime, setDropTime] = useState(null);
     const [gameOver, setGameOver] = useState(false);
     const [gameStarted, setGameStarted] = useState(false);
@@ -30,21 +33,74 @@ const Tetris = ({ inBattle }) => {
     const [player, updatePlayerPos, resetPlayer, playerRotate] = usePlayer();
     const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
     const [score, setScore, rows, setRows, level, setLevel] = useGameStatus(rowsCleared);
+    const [canStartDuel, setCanStartDuel] = React.useState(false);
+    const [startedDuel, setStartedDuel] = React.useState(false);
+
+    const { socket } = React.useContext(GameContext);
+    const { localUser } = React.useContext(GameContextWithoutSocketTrigger);
+
+    useInterval(() => {
+        if(opponent && gameStarted) {
+            console.log('called')
+            socket.on('receiveOpponentFieldInfo', (oppInfo, score, rows, level) => {
+                player.tetromino = oppInfo.tetromino;
+                player.pos = oppInfo.pos;
+                player.collided = oppInfo.collided;
+                setScore(score);
+                setLevel(level);
+                setRows(rows);
+            });
+        }
+    }, 200);
+
+    React.useEffect(() => {
+        socket.on('opponentReady', (res) => {
+            if(setWaitingForChallenger) {
+                setWaitingForChallenger(res);
+            }
+        });
+
+        socket.on('checkIfBothPlayerReady', (res) => {
+            if(!canStartDuel && !startedDuel) {
+                setCanStartDuel(res);
+                if(setGetReady !== undefined) {
+                    setGetReady(false);
+                }
+            }
+        });
+
+        return () => {
+            socket.off('opponentReady');
+            socket.off('checkIfBothPlayerReady');
+        }
+    }, [socket, setWaitingForChallenger, canStartDuel, setCanStartDuel, startedDuel, setGetReady]);
+
+    useInterval(() => {
+        if(!canStartDuel && !startedDuel) {
+            socket.emit('checkIfBothPlayerReady');
+        }
+    }, 4000)
 
     const movePlayer = (direction) => {
         if(!checkCollision(player, stage, {x: direction, y: 0})) {
             updatePlayerPos({ x: direction, y: 0 });
         }
     }
+
     const startGame = () => {
         // Resets everything
-        setStage(createStage());
-        setDropTime(1000);
-        resetPlayer();
-        setGameOver(false);
-        setScore(0);
-        setRows(0);
-        setLevel(1);
+        if(!canStartDuel && inBattle) {
+            socket.emit('ready', localUser);
+        } else if(!canStartDuel && !inBattle) {
+            setStage(createStage());
+            setDropTime(1000);
+            resetPlayer();
+            setGameStarted(true);
+            setGameOver(false);
+            setScore(0);
+            setRows(0);
+            setLevel(1);
+        }
     }
 
     const drop = (fullDrop = 1, fromFullDrop = false) => {
@@ -142,6 +198,25 @@ const Tetris = ({ inBattle }) => {
     useInterval(() => {
         drop();
     }, dropTime);
+    
+    if(canStartDuel && !startedDuel) {
+        setStartedDuel(true);        
+        setCanStartDuel(false);
+        setStage(createStage());
+        setDropTime(1000);
+        resetPlayer();
+        setGameStarted(true);
+        setGameOver(false);
+        setScore(0);
+        setRows(0);
+        setLevel(1);
+    }
+    
+    useInterval(() => {
+        if(gameStarted && !opponent) {
+            socket.emit('sendLocalFieldInfoToOpp', player, score, rows, level);
+        }
+    }, 200)
 
     return(
         <InputWrapper id="controller" role="button" tabIndex="0" onKeyDown={e => move(e)} onKeyUp={e => keyUp(e)}>
@@ -170,7 +245,12 @@ const Tetris = ({ inBattle }) => {
                                 </>
                         }
                     </div>
-                    <StartButton setGameStarted={setGameStarted} callback={startGame} inBattle={inBattle}/>
+                    
+                    <StartButton 
+                        callback={startGame} 
+                        inBattle={inBattle}
+                        waitingForChallenger={waitingForChallenger}
+                    />
                 </aside>
             </TetrisStage>
         </InputWrapper>

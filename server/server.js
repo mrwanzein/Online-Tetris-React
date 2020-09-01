@@ -139,14 +139,41 @@ io.on('connection', (socket) => {
             });
             
             let opponent;
-
+            
             usersInRoom[indexOfRoom].forEach(data => {
                 if(typeof data !== 'string' && data[0] !== socket.username) {
                     opponent = data[0];
                 }
             });
-
+            
+            
             io.to(globalOnlineUsers.find(user => user[0] === opponent)[1]).emit('receiveOpponentFieldInfo', oppInfo, score, rows, level);
+        }
+    });
+
+    socket.on('opponentLost?', (opponentHasLost, gamestarted, dropTime) => {
+        if(globalOnlineUsers.length) {
+            let indexOfRoom;
+            usersInRoom.forEach((rooms, index) => {
+                rooms.forEach(data => {
+                    if(typeof data !== 'string' && data.includes(socket.username)) {
+                        indexOfRoom = index;
+                    }
+                });
+            });
+            
+            let opponent;
+            
+            usersInRoom[indexOfRoom].forEach(data => {
+                if(typeof data !== 'string' && data[0] !== socket.username) {
+                    opponent = data[0];
+                }
+            });
+            
+            
+            if(opponentHasLost) {
+                io.to(globalOnlineUsers.find(user => user[0] === opponent)[1]).emit('opponentLost?', opponentHasLost,  gamestarted, dropTime);
+            }
         }
     });
     // ↑ -------------------- When 2 users accepted a  challenge  -------------------------------------------------------- ↑
@@ -203,9 +230,14 @@ app.post('/login', async(req, res) => {
     try {
         const user = await getUser(username);
         
+        let alreadyLogged;
+        onlineUsers.forEach(users => {
+            if(users.includes(username)) alreadyLogged = true;
+        })
+
         if(user) {
-            if(onlineUsers.includes(username)) {
-                res.status(200).json({ status: 200, status: "Already Logged"});
+            if(alreadyLogged) {
+                res.status(200).json({ status: 200, message: "Already Logged"});
             }
             else if(await bcrypt.compare(password, user.password)){
                 res.status(200).json({ status: 200, status: "success", username: user.username });

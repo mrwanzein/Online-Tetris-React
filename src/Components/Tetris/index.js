@@ -41,7 +41,13 @@ const Tetris = ({ inBattle, waitingForChallenger, setWaitingForChallenger, oppon
 
     useInterval(() => {
         if(opponent && gameStarted) {
-            console.log('called')
+            socket.on('opponentLost?', (opponentHasLost, gamestarted, dropTime) => {
+                if(opponentHasLost) {
+                    setGameOver(true);
+                    setGameStarted(gamestarted);
+                    setDropTime(dropTime);
+                }
+            });
             socket.on('receiveOpponentFieldInfo', (oppInfo, score, rows, level) => {
                 player.tetromino = oppInfo.tetromino;
                 player.pos = oppInfo.pos;
@@ -115,6 +121,9 @@ const Tetris = ({ inBattle, waitingForChallenger, setWaitingForChallenger, oppon
         } else {
             // Checking if a tetromino is overflowing the top of the stage
             if(player.pos.y < 1) {
+                if(gameStarted && !opponent) {
+                    socket.emit('opponentLost?', true, false, null);
+                }
                 setGameOver(true);
                 setGameStarted(false);
                 setDropTime(null);

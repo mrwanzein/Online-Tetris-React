@@ -44,9 +44,9 @@ const Log_in = () => {
                     ...formVals,
                     password: ""
                 });
-            } else if(data.status === "Already logged") {
+            } else if(data.message === "Already logged") {
                 setLoadingIcon(false);
-                setWarningMsg(data.status);
+                setWarningMsg(data.message);
             } else {
                 setLoadingIcon(false);
                 setWarningMsg(data.message);
